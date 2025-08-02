@@ -14,7 +14,7 @@ L.Icon.Default.mergeOptions({
 
 // Custom marker icons for different statuses
 const statusIcons = {
-  pending: new L.Icon({
+  reported: new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
     iconSize: [25, 41],
@@ -22,7 +22,15 @@ const statusIcons = {
     popupAnchor: [1, -34],
     shadowSize: [41, 41]
   }),
-  'in-progress': new L.Icon({
+  in_review: new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  }),
+  in_progress: new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
     iconSize: [25, 41],
@@ -32,6 +40,14 @@ const statusIcons = {
   }),
   resolved: new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  }),
+  closed: new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
@@ -54,15 +70,38 @@ interface DynamicMapProps {
   zoom?: number;
   height?: string;
   onIssueClick?: (issue: Issue) => void;
+  fitBounds?: boolean;
 }
 
-// Component to handle map updates
-const MapUpdater: React.FC<{ center: [number, number]; zoom: number }> = ({ center, zoom }) => {
+// Component to handle map updates and bounds fitting
+const MapController: React.FC<{ 
+  center: [number, number]; 
+  zoom: number; 
+  issues: Issue[];
+  fitBounds?: boolean;
+}> = ({ center, zoom, issues, fitBounds }) => {
   const map = useMap();
   
   useEffect(() => {
-    map.setView(center, zoom);
-  }, [map, center, zoom]);
+    if (fitBounds && issues.length > 0) {
+      // Create bounds from all issue locations
+      const bounds = L.latLngBounds([]);
+      
+      issues.forEach(issue => {
+        const lat = issue.location.lat || issue.location.latitude;
+        const lng = issue.location.lng || issue.location.longitude;
+        if (lat && lng) {
+          bounds.extend([lat, lng]);
+        }
+      });
+      
+      if (bounds.isValid()) {
+        map.fitBounds(bounds, { padding: [20, 20], maxZoom: 15 });
+      }
+    } else {
+      map.setView(center, zoom);
+    }
+  }, [map, center, zoom, issues, fitBounds]);
   
   return null;
 };
@@ -72,7 +111,8 @@ const DynamicMap: React.FC<DynamicMapProps> = ({
   center = [22.60500, 72.84500], // Default to Changa village coordinates
   zoom = 13,
   height = '400px',
-  onIssueClick 
+  onIssueClick,
+  fitBounds = true
 }) => {
   const [mapCenter, setMapCenter] = useState<[number, number]>(center);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
@@ -85,23 +125,29 @@ const DynamicMap: React.FC<DynamicMapProps> = ({
           const { latitude, longitude } = position.coords;
           console.log('User location detected:', { latitude, longitude });
           setUserLocation([latitude, longitude]);
-          setMapCenter([latitude, longitude]);
+          if (!fitBounds) {
+            setMapCenter([latitude, longitude]);
+          }
         },
         (error) => {
           console.log('Could not get location:', error);
           // If geolocation fails, use default location
-          setMapCenter(center);
+          if (!fitBounds) {
+            setMapCenter(center);
+          }
         }
       );
     } else {
       // If geolocation not available, use default location
-      setMapCenter(center);
+      if (!fitBounds) {
+        setMapCenter(center);
+      }
     }
-  }, [center]);
+  }, [center, fitBounds]);
 
-  // Update center when issues change
+  // Update center when issues change (only if not fitting bounds)
   useEffect(() => {
-    if (issues.length > 0) {
+    if (!fitBounds && issues.length > 0) {
       const firstIssue = issues[0];
       // Handle both latitude/longitude and lat/lng formats
       const lat = firstIssue.location.lat || firstIssue.location.latitude;
@@ -113,7 +159,7 @@ const DynamicMap: React.FC<DynamicMapProps> = ({
         console.warn('Invalid location data for first issue:', firstIssue.location);
       }
     }
-  }, [issues]);
+  }, [issues, fitBounds]);
 
   const handleMarkerClick = (issue: Issue) => {
     if (onIssueClick) {
@@ -135,12 +181,18 @@ const DynamicMap: React.FC<DynamicMapProps> = ({
         zoom={zoom}
         style={{ height: '100%', width: '100%', minHeight: '400px' }}
         scrollWheelZoom={true}
+        zoomControl={true}
+        doubleClickZoom={true}
+        dragging={true}
+        touchZoom={true}
+        keyboard={true}
+        boxZoom={true}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <MapUpdater center={mapCenter} zoom={zoom} />
+        <MapController center={mapCenter} zoom={zoom} issues={issues} fitBounds={fitBounds} />
         
         {/* User location marker */}
         {userLocation && (
@@ -168,7 +220,7 @@ const DynamicMap: React.FC<DynamicMapProps> = ({
             <Marker
               key={issue.id}
               position={[lat, lng]}
-              icon={statusIcons[issue.status] || statusIcons.pending}
+              icon={statusIcons[issue.status] || statusIcons.reported}
               eventHandlers={{
                 click: () => handleMarkerClick(issue)
               }}
@@ -179,9 +231,11 @@ const DynamicMap: React.FC<DynamicMapProps> = ({
                   <p className="text-sm text-gray-600 mb-2 line-clamp-3">{issue.description}</p>
                   <div className="flex items-center justify-between text-xs">
                     <span className={`px-2 py-1 rounded-full ${
-                      issue.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      issue.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                      issue.status === 'reported' ? 'bg-yellow-100 text-yellow-800' :
+                      issue.status === 'in_review' ? 'bg-orange-100 text-orange-800' :
+                      issue.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
                       issue.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                      issue.status === 'closed' ? 'bg-gray-100 text-gray-800' :
                       'bg-red-100 text-red-800'
                     }`}>
                       {issue.status.replace('-', ' ')}

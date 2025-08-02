@@ -6,9 +6,11 @@ import DynamicMap from '../common/DynamicMap';
 import FlagIssueModal from '../common/FlagIssueModal';
 
 const statusColors = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  'in-progress': 'bg-blue-100 text-blue-800',
+  reported: 'bg-yellow-100 text-yellow-800',
+  in_review: 'bg-orange-100 text-orange-800', 
+  in_progress: 'bg-blue-100 text-blue-800',
   resolved: 'bg-green-100 text-green-800',
+  closed: 'bg-gray-100 text-gray-800',
   rejected: 'bg-red-100 text-red-800'
 };
 
@@ -25,6 +27,7 @@ const MapView: React.FC = () => {
   });
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showAllLocations, setShowAllLocations] = useState(true);
   const [flagModal, setFlagModal] = useState<{isOpen: boolean; issueId: string; issueTitle: string}>({
     isOpen: false,
     issueId: '',
@@ -121,9 +124,11 @@ const MapView: React.FC = () => {
               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="in-progress">In Progress</option>
+              <option value="reported">Reported</option>
+              <option value="in_review">In Review</option>
+              <option value="in_progress">In Progress</option>
               <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
               <option value="rejected">Rejected</option>
             </select>
             
@@ -175,6 +180,14 @@ const MapView: React.FC = () => {
                 <List className="w-4 h-4" />
               </button>
             </div>
+            
+            {/* Fit all locations button */}
+            <button
+              onClick={() => setShowAllLocations(!showAllLocations)}
+              className="px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              {showAllLocations ? 'Center Map' : 'Show All'}
+            </button>
           </div>
         </div>
       </div>
@@ -185,9 +198,18 @@ const MapView: React.FC = () => {
           <>
             {/* Interactive Map */}
             <div className="flex-1 relative">
+              {/* Map controls info */}
+              <div className="absolute top-4 left-4 z-10 bg-white p-2 rounded-lg shadow-lg text-xs text-gray-600">
+                <div>🖱️ Scroll to zoom</div>
+                <div>🤏 Double-click to zoom in</div>
+                <div>📍 Click markers for details</div>
+                <div>Issues: {filteredIssues.length}</div>
+              </div>
+              
               <DynamicMap 
                 issues={filteredIssues} 
                 height="100%"
+                fitBounds={showAllLocations}
                 onIssueClick={(issue) => {
                   console.log('Issue clicked:', issue);
                 }}
