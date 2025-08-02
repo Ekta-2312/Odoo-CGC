@@ -1,6 +1,13 @@
+/**
+ * @fileoverview Main App Component for CivicTrack
+ * Sets up routing, authentication, error boundaries, and global providers
+ */
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './components/common/Toast';
+import ErrorBoundary from './components/common/ErrorBoundary';
 import Navbar from './components/common/Navbar';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
@@ -22,6 +29,11 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import FlaggedReportsAdmin from './components/admin/FlaggedReportsAdmin';
 import AdminAnalytics from './components/admin/AdminAnalytics';
 import UserManagementAdmin from './components/admin/UserManagementAdmin';
+
+/**
+ * App Content Component
+ * Contains the main routing logic and layout
+ */
 
 const AppContent: React.FC = () => {
   const { user } = useAuth();
@@ -96,13 +108,21 @@ const AppContent: React.FC = () => {
   );
 };
 
+/**
+ * Main App Component
+ * Wraps the entire application with global providers and error boundaries
+ */
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </AuthProvider>
+    <ErrorBoundary>
+      <ToastProvider>
+        <AuthProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </AuthProvider>
+      </ToastProvider>
+    </ErrorBoundary>
   );
 }
 

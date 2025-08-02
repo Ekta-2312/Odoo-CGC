@@ -1,10 +1,18 @@
+/**
+ * @fileoverview Dynamic Map Component for CivicTrack
+ * Displays civic issues on an interactive Leaflet map with customizable markers and controls
+ */
+
 import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Issue } from '../../types';
 
-// Fix for default markers
+/**
+ * Fix for default Leaflet markers in React applications
+ * This resolves the default marker icon path issues
+ */
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -12,7 +20,10 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom marker icons for different statuses
+/**
+ * Custom marker icons for different issue statuses
+ * Each status has a unique color to help users quickly identify issue states
+ */
 const statusIcons = {
   reported: new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png',
@@ -64,16 +75,28 @@ const statusIcons = {
   })
 };
 
+/**
+ * Props interface for the DynamicMap component
+ */
 interface DynamicMapProps {
+  /** Array of issues to display on the map */
   issues: Issue[];
+  /** Initial center coordinates [latitude, longitude] */
   center?: [number, number];
+  /** Initial zoom level */
   zoom?: number;
+  /** Height of the map container */
   height?: string;
+  /** Callback function when an issue marker is clicked */
   onIssueClick?: (issue: Issue) => void;
+  /** Whether to automatically fit map bounds to show all issues */
   fitBounds?: boolean;
 }
 
-// Component to handle map updates and bounds fitting
+/**
+ * Map Controller Component
+ * Handles map view updates, bounds fitting, and user location detection
+ */
 const MapController: React.FC<{ 
   center: [number, number]; 
   zoom: number; 
@@ -105,6 +128,11 @@ const MapController: React.FC<{
   
   return null;
 };
+
+/**
+ * Dynamic Map Component
+ * Renders an interactive map with civic issue markers, user location, and various controls
+ */
 
 const DynamicMap: React.FC<DynamicMapProps> = ({ 
   issues, 

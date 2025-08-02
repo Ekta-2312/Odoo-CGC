@@ -53,11 +53,76 @@ export const sampleData = {
       phone: '9876543210',
       password: 'admin123',
       role: 'admin' as const,
-      isVerified: true
+      isVerified: true,
+      defaultLocation: {
+        latitude: 22.554029,
+        longitude: 72.948936,
+        address: 'Anand City Center, District Headquarters, Anand, Gujarat'
+      }
     }
   ],
   
   issues: [
+    {
+      title: 'CHARUSAT Campus Pond - Water Quality Concerns',
+      description: 'The campus pond at CHARUSAT has developed algae growth and water quality issues. Students and faculty have reported foul odor and discoloration of water. This affects the campus environment and may pose health risks. The pond needs immediate cleaning and water treatment.',
+      category: 'environment' as const,
+      priority: 'high' as const,
+      location: {
+        latitude: 22.59806,
+        longitude: 72.82000,
+        address: 'CHARUSAT Campus Pond, Changa, Anand District, Gujarat',
+        district: 'Anand',
+        ward: 'Changa'
+      },
+      images: [
+        '/uploads/images-1754118580135-302734746.JPG',
+        '/uploads/images-1754120544246-873389425.jpeg'
+      ],
+      tags: ['water-quality', 'environment', 'campus'],
+      views: 89,
+      isPublic: true
+    },
+    {
+      title: 'SPU Campus - Broken Streetlights on Main Road',
+      description: 'Multiple streetlights along the main road at Sardar Patel University campus are not functioning. This creates safety concerns for students walking at night between hostels and academic buildings. The lighting infrastructure needs urgent repair to ensure student safety.',
+      category: 'safety' as const,
+      priority: 'high' as const,
+      location: {
+        latitude: 22.554832,
+        longitude: 72.924866,
+        address: 'Sardar Patel University, Vallabh Vidyanagar, Anand District, Gujarat',
+        district: 'Anand',
+        ward: 'Vallabh Vidyanagar'
+      },
+      images: [
+        '/uploads/images-1754120562617-748197882.jpeg',
+        '/uploads/images-1754121392703-721413137.JPG'
+      ],
+      tags: ['lighting', 'safety', 'university'],
+      views: 156,
+      isPublic: true
+    },
+    {
+      title: 'Anand City Center - Traffic Congestion and Poor Road Conditions',
+      description: 'The main road at Anand City Center experiences severe traffic congestion during peak hours. Additionally, multiple potholes and uneven road surfaces are causing vehicle damage and safety hazards. The district headquarters area needs better traffic management and road repairs.',
+      category: 'transportation' as const,
+      priority: 'medium' as const,
+      location: {
+        latitude: 22.554029,
+        longitude: 72.948936,
+        address: 'Anand City Center, District Headquarters, Anand, Gujarat',
+        district: 'Anand',
+        ward: 'City Center'
+      },
+      images: [
+        '/uploads/images-1754124292835-243869541.JPG',
+        '/uploads/images-1754125035579-902258482.JPG'
+      ],
+      tags: ['traffic', 'infrastructure', 'city-center'],
+      views: 203,
+      isPublic: true
+    },
     {
       title: 'Pothole on Main Street causing traffic delays',
       description: 'Large pothole at the intersection of Main Street and 5th Avenue is causing significant traffic delays and potential vehicle damage. The hole is approximately 3 feet wide and 1 foot deep. Multiple vehicles have been seen swerving to avoid it, creating dangerous driving conditions.',

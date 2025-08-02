@@ -199,21 +199,31 @@ const MapView: React.FC = () => {
             {/* Interactive Map */}
             <div className="flex-1 relative">
               {/* Map controls info */}
-              <div className="absolute top-4 left-4 z-10 bg-white p-2 rounded-lg shadow-lg text-xs text-gray-600">
+              <div 
+                className="absolute top-4 left-4 z-10 bg-white p-2 rounded-lg shadow-lg text-xs text-gray-600"
+                role="complementary"
+                aria-label="Map controls information"
+              >
                 <div>🖱️ Scroll to zoom</div>
                 <div>🤏 Double-click to zoom in</div>
                 <div>📍 Click markers for details</div>
-                <div>Issues: {filteredIssues.length}</div>
+                <div aria-live="polite">Issues: {filteredIssues.length}</div>
               </div>
               
-              <DynamicMap 
-                issues={filteredIssues} 
-                height="100%"
-                fitBounds={showAllLocations}
-                onIssueClick={(issue) => {
-                  console.log('Issue clicked:', issue);
-                }}
-              />
+              <div 
+                role="application"
+                aria-label="Interactive map showing civic issues"
+                tabIndex={0}
+              >
+                <DynamicMap 
+                  issues={filteredIssues} 
+                  height="100%"
+                  fitBounds={showAllLocations}
+                  onIssueClick={(issue) => {
+                    console.log('Issue clicked:', issue);
+                  }}
+                />
+              </div>
             </div>
 
             {/* Sidebar */}
